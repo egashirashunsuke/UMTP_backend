@@ -1,0 +1,14 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: server
+    environment:
+      TZ: Asia/Tokyo
+    tty: true
+    volumes:
+      - ./:/app
+    ports:
+      - "8000:8000"
+
