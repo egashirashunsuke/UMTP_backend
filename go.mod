@@ -1,4 +1,4 @@
-module UMTP_backend
+module github.com/egashirashunsuke/UMTP_backend
 
 go 1.24.2
 
