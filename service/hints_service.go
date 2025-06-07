@@ -12,7 +12,7 @@ import (
 
 // HintsService はビジネスロジック層のインターフェース（テスト用に実装差し替えしやすくするため）
 type HintsService interface {
-	GetHints(ctx context.Context, question string) (string, error)
+	GetHints(ctx context.Context, answer map[string]*string) (string, error)
 }
 
 // hintsServiceImpl は実際の実装
@@ -44,10 +44,7 @@ func NewHintsService() HintsService {
 }
 
 // GetHints は OpenAI の ChatCompletion を呼び出し、返ってきたテキストを返す
-func (s *hintsServiceImpl) GetHints(ctx context.Context, question string) (string, error) {
-	if question == "" {
-		return "", errors.New("質問が空です")
-	}
+func (s *hintsServiceImpl) GetHints(ctx context.Context, answers map[string]*string) (string, error) {
 
 	tmplPate := filepath.Join("template", "hints_prompt.tmpl")
 	b, err := os.ReadFile(tmplPate)
