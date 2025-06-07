@@ -28,7 +28,7 @@ func main() {
 	e.GET("/health", func(c echo.Context) error {
 		return c.String(http.StatusOK, "OK")
 	})
-	e.GET("/", handler.NewHintsHandler().GetHints)
+	e.POST("/", handler.NewHintsHandler().GetHints)
 
 	e.Logger.Fatal(e.Start(":8000"))
 }

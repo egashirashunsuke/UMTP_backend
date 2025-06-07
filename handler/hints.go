@@ -8,6 +8,10 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+type SubmitAnswerRequest struct {
+	Answers map[string]*string `json:"answers"`
+}
+
 type HintsHandler struct {
 	hintsSvc service.HintsService
 }
@@ -19,12 +23,13 @@ func NewHintsHandler() *HintsHandler {
 }
 
 func (h *HintsHandler) GetHints(c echo.Context) error {
-	question := c.QueryParam("question")
-	if question == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "質問をクエリパラメータ 'question' に指定してください"})
+	var req SubmitAnswerRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "リクエストのバインドに失敗しました"})
+
 	}
 
-	answer, err := h.hintsSvc.GetHints(c.Request().Context(), question)
+	answer, err := h.hintsSvc.GetHints(c.Request().Context(), req.Answers)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
