@@ -3,8 +3,10 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/option"
@@ -46,15 +48,34 @@ func NewHintsService() HintsService {
 // GetHints は OpenAI の ChatCompletion を呼び出し、返ってきたテキストを返す
 func (s *hintsServiceImpl) GetHints(ctx context.Context, answers map[string]*string) (string, error) {
 
-	tmplPate := filepath.Join("template", "hints_prompt.tmpl")
-	b, err := os.ReadFile(tmplPate)
+	templatePath := filepath.Join("template", "hints_prompt.tmpl")
+	b, err := os.ReadFile(templatePath)
 	if err != nil {
 		return "", err
 	}
 
+	var keys []string
+	for k := range answers {
+		keys = append(keys, k)
+	}
+	var sb strings.Builder
+	for _, k := range keys {
+		val := ""
+		if answers[k] != nil {
+			val = *answers[k]
+		}
+		sb.WriteString(fmt.Sprintf("%s: %s\n", k, val))
+	}
+	answersStr := sb.String()
+
+	prompt := fmt.Sprintf(string(b), answersStr)
+
+	fmt.Println("=== OpenAIへ送るプロンプト ===")
+	fmt.Println(prompt)
+
 	// ChatCompletion のリクエスト用にメッセージを作る
 	messages := []openai.ChatCompletionMessageParamUnion{
-		openai.UserMessage(string(b)),
+		openai.UserMessage(prompt),
 	}
 
 	// ChatCompletion を実行
