@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"os"
+	"path/filepath"
 
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/option"
@@ -48,9 +49,15 @@ func (s *hintsServiceImpl) GetHints(ctx context.Context, question string) (strin
 		return "", errors.New("質問が空です")
 	}
 
+	tmplPate := filepath.Join("template", "hints_prompt.tmpl")
+	b, err := os.ReadFile(tmplPate)
+	if err != nil {
+		return "", err
+	}
+
 	// ChatCompletion のリクエスト用にメッセージを作る
 	messages := []openai.ChatCompletionMessageParamUnion{
-		openai.UserMessage(question),
+		openai.UserMessage(string(b)),
 	}
 
 	// ChatCompletion を実行
