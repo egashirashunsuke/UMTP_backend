@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/openai/openai-go"
@@ -58,6 +59,7 @@ func (s *hintsServiceImpl) GetHints(ctx context.Context, answers map[string]*str
 	for k := range answers {
 		keys = append(keys, k)
 	}
+	sort.Strings(keys)
 	var sb strings.Builder
 	for _, k := range keys {
 		val := ""
