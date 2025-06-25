@@ -19,7 +19,10 @@ func main() {
 
 	e := echo.New()
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"http://localhost:5173"}, // React の開発サーバー
+		AllowOrigins: []string{
+			"http://localhost:5173",
+			"https://umtp-shunsuke-egashiras-projects.vercel.app",
+		},
 		AllowMethods: []string{http.MethodGet, http.MethodPost},
 		// 必要に応じて PUT, DELETE, OPTIONS なども追加
 	}))
