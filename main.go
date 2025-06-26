@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/egashirashunsuke/UMTP_backend/handler"
 	"github.com/joho/godotenv"
@@ -33,5 +34,10 @@ func main() {
 	})
 	e.POST("/", handler.NewHintsHandler().GetHints)
 
-	e.Logger.Fatal(e.Start(":8000"))
+	// PORT環境変数を取得し、なければ10000を使う
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "10000"
+	}
+	e.Logger.Fatal(e.Start("0.0.0.0:" + port))
 }
