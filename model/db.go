@@ -29,6 +29,11 @@ func DBConnection() *sql.DB {
 
 // DBのdsnを取得する
 func GetDBConfig() string {
+
+	if url := os.Getenv("DATABASE_URL"); url != "" {
+		return url
+	}
+
 	user := os.Getenv("DB_USER")
 	password := os.Getenv("DB_PASSWORD")
 	host := os.Getenv("DB_HOST")
