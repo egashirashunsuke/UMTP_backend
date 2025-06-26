@@ -6,6 +6,7 @@ services:
     container_name: server
     environment:
       TZ: Asia/Tokyo
+      PORT: 8000 
     tty: true
     volumes:
       - ./:/app
