@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/egashirashunsuke/UMTP_backend/handler"
+	"github.com/egashirashunsuke/UMTP_backend/model"
 	"github.com/joho/godotenv"
 
 	"github.com/labstack/echo/v4"
@@ -13,6 +14,9 @@ import (
 )
 
 func main() {
+
+	sqlDB := model.DBConnection()
+	defer sqlDB.Close()
 
 	if err := godotenv.Load(); err != nil {
 		log.Println(".envファイルが見つかりません．")
