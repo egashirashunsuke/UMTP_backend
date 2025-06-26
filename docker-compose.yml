@@ -4,12 +4,31 @@ services:
       context: .
       dockerfile: ./Dockerfile
     container_name: server
+    depends_on:
+      - postgres
     environment:
       TZ: Asia/Tokyo
       PORT: 8000 
+      DB_HOST: postgres          # ← サービス名をそのままホスト名に
+      DB_PORT: 5432
+      DB_USER: user
+      DB_PASSWORD: password
+      DB_NAME: mydatabase
     tty: true
     volumes:
       - ./:/app
     ports:
       - "8000:8000"
-
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydatabase
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+volumes:
+  db_data:
