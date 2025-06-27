@@ -1,7 +1,6 @@
 package model
 
 import (
-	"database/sql"
 	"fmt"
 	"os"
 
@@ -12,7 +11,7 @@ import (
 var db *gorm.DB
 
 // DB接続とテーブルを作成する
-func DBConnection() *sql.DB {
+func DBConnection() *gorm.DB {
 	dsn := GetDBConfig()
 	var err error
 	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
@@ -20,11 +19,7 @@ func DBConnection() *sql.DB {
 		panic(fmt.Errorf("DB Error: %w", err))
 	}
 	CreateTable(db)
-	sqlDB, err := db.DB()
-	if err != nil {
-		panic(fmt.Errorf("DB Error: %w", err))
-	}
-	return sqlDB
+	return db
 }
 
 // DBのdsnを取得する
