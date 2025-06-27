@@ -15,7 +15,8 @@ import (
 
 func main() {
 
-	sqlDB := model.DBConnection()
+	db := model.DBConnection()
+	sqlDB, _ := db.DB()
 	defer sqlDB.Close()
 
 	if err := godotenv.Load(); err != nil {
@@ -37,6 +38,8 @@ func main() {
 		return c.String(http.StatusOK, "OK")
 	})
 	e.POST("/", handler.NewHintsHandler().GetHints)
+
+	e.GET("/quesion/:questionID", handler.NewQuestionHandler(db).GetQuestionByID)
 
 	// PORT環境変数を取得し、なければ10000を使う
 	port := os.Getenv("PORT")
