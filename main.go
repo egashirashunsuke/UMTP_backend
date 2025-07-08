@@ -39,7 +39,7 @@ func main() {
 	})
 	e.POST("/", handler.NewHintsHandler().GetHints)
 
-	e.GET("/quesion/:questionID", handler.NewQuestionHandler(db).GetQuestionByID)
+	e.GET("/question/:questionID", handler.NewQuestionHandler(db).GetQuestionByID)
 
 	// PORT環境変数を取得し、なければ10000を使う
 	port := os.Getenv("PORT")
