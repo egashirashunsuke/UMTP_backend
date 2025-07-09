@@ -1,21 +1,32 @@
 package service
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 	"sort"
 	"strings"
+	"text/template"
 
+	"github.com/egashirashunsuke/UMTP_backend/model"
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/option"
 )
 
+type PromptData struct {
+	ProblemDescription   string
+	Question             string
+	ClassDiagramPlantUML string
+	Choices              string
+	StudentAnswers       string
+	Steps                string
+}
+
 // HintsService はビジネスロジック層のインターフェース（テスト用に実装差し替えしやすくするため）
 type HintsService interface {
-	GetHints(ctx context.Context, answer map[string]*string) (string, error)
+	GetHints(ctx context.Context, question *model.Question, answer map[string]*string) (string, error)
 }
 
 // hintsServiceImpl は実際の実装
@@ -47,13 +58,7 @@ func NewHintsService() HintsService {
 }
 
 // GetHints は OpenAI の ChatCompletion を呼び出し、返ってきたテキストを返す
-func (s *hintsServiceImpl) GetHints(ctx context.Context, answers map[string]*string) (string, error) {
-
-	templatePath := filepath.Join("template", "hints_prompt.tmpl")
-	b, err := os.ReadFile(templatePath)
-	if err != nil {
-		return "", err
-	}
+func (s *hintsServiceImpl) GetHints(ctx context.Context, question *model.Question, answers map[string]*string) (string, error) {
 
 	var keys []string
 	for k := range answers {
@@ -70,7 +75,17 @@ func (s *hintsServiceImpl) GetHints(ctx context.Context, answers map[string]*str
 	}
 	answersStr := sb.String()
 
-	prompt := fmt.Sprintf(string(b), answersStr)
+	prompt, err := BuildPrompt(PromptData{
+		ProblemDescription:   question.ProblemDescription,
+		Question:             question.Question,
+		ClassDiagramPlantUML: question.ClassDiagramPlantUML,
+		Choices:              FormatChoices(question.Choices),
+		StudentAnswers:       answersStr,
+		Steps:                question.AnswerProcess,
+	})
+	if err != nil {
+		return "", err
+	}
 
 	fmt.Println("=== OpenAIへ送るプロンプト ===")
 	fmt.Println(prompt)
@@ -95,4 +110,28 @@ func (s *hintsServiceImpl) GetHints(ctx context.Context, answers map[string]*str
 
 	// 返ってきた最初の選択肢を文字列として返却
 	return resp.Choices[0].Message.Content, nil
+}
+
+func BuildPrompt(data PromptData) (string, error) {
+	tmpl, err := template.ParseFiles("template/hints_prompt.tmpl")
+	if err != nil {
+		return "", err
+	}
+	var buf bytes.Buffer
+	if err := tmpl.Execute(&buf, data); err != nil {
+		return "", err
+	}
+	return buf.String(), nil
+}
+
+func FormatChoices(choices []model.Choice) string {
+	// ラベル順にソート
+	sort.Slice(choices, func(i, j int) bool {
+		return choices[i].Label < choices[j].Label
+	})
+	var sb strings.Builder
+	for _, c := range choices {
+		sb.WriteString(fmt.Sprintf("%s. %s\n", c.Label, c.Text))
+	}
+	return sb.String()
 }

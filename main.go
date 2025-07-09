@@ -37,7 +37,7 @@ func main() {
 	e.GET("/health", func(c echo.Context) error {
 		return c.String(http.StatusOK, "OK")
 	})
-	e.POST("/", handler.NewHintsHandler().GetHints)
+	e.POST("/:questionID", handler.NewHintsHandler(db).GetHints)
 
 	e.GET("/question/:questionID", handler.NewQuestionHandler(db).GetQuestionByID)
 	e.GET("/questions", handler.NewQuestionHandler(db).GetAllQuestions)
