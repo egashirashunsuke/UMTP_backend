@@ -34,3 +34,12 @@ func (h *QuestionHandler) GetQuestionByID(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, question)
 }
+
+func (h *QuestionHandler) GetAllQuestions(c echo.Context) error {
+	var questions []model.Question
+	if err := h.DB.Preload("Choices").Find(&questions).Error; err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, questions)
+}
