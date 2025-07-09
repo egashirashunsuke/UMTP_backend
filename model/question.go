@@ -8,8 +8,9 @@ type Question struct {
 	ID                 int      `json:"id" gorm:"primaryKey"`
 	ProblemDescription string   `json:"problem_description"`
 	Question           string   `json:"question"`
-	Answer             string   `json:"answer"`
+	AnswerProcess	  string   `json:"answer_process"`
 	Image              string   `json:"image"`
+	ClassDiagramPlantUML string `json:"class_diagram_plantuml"`
 	Choices            []Choice `json:"choices" gorm:"foreignKey:QuestionID"`
 	CreatedAt          string   `json:"created_at"`
 }

@@ -2,8 +2,11 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
+	"github.com/egashirashunsuke/UMTP_backend/model"
 	"github.com/egashirashunsuke/UMTP_backend/service"
+	"gorm.io/gorm"
 
 	"github.com/labstack/echo/v4"
 )
@@ -14,11 +17,13 @@ type SubmitAnswerRequest struct {
 
 type HintsHandler struct {
 	hintsSvc service.HintsService
+	DB *gorm.DB
 }
 
-func NewHintsHandler() *HintsHandler {
+func NewHintsHandler(db *gorm.DB) *HintsHandler {
 	return &HintsHandler{
 		hintsSvc: service.NewHintsService(),
+		DB: db,
 	}
 }
 
@@ -29,7 +34,18 @@ func (h *HintsHandler) GetHints(c echo.Context) error {
 
 	}
 
-	answer, err := h.hintsSvc.GetHints(c.Request().Context(), req.Answers)
+	idStr := c.Param("questionID")
+    id, err := strconv.Atoi(idStr)
+    if err != nil {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid questionID"})
+    }
+
+	question, err := model.GetQuestionByID(h.DB, id)
+    if err != nil {
+        return c.JSON(http.StatusNotFound, map[string]string{"error": "question not found"})
+    }
+
+	answer, err := h.hintsSvc.GetHints(c.Request().Context(), question, req.Answers)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
