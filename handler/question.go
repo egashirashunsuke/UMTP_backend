@@ -43,3 +43,16 @@ func (h *QuestionHandler) GetAllQuestions(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, questions)
 }
+
+func (h *QuestionHandler) CreateQuestion(c echo.Context) error {
+	var question model.Question
+	if err := c.Bind(&question); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid input"})
+	}
+
+	if err := h.DB.Create(&question).Error; err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusCreated, question)
+}

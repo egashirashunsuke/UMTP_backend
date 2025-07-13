@@ -51,7 +51,7 @@ func CreateTable(db *gorm.DB) {
 この市には第1と第2の駐輪場があります。それぞれの駐輪場で、月額料金は異なります。
 市営駐輪場の利用を申し込むには、事前に会員登録する必要があります。会員登録では、氏名、住所、電話番号、メールアドレスを登録します。会員登録をすると、登録番号とパスワードがメールで送付されます。駐輪場の申し込み画面を開き、登録番号とパスワードを入力し、ログインしたあとに、希望の駐輪場を選択し利用申請をします。希望者が多数の場合は、抽選が行われます。抽選が外れると、次回の抽選で当選しやすくなります。`,
 		Question: `次のクラス図のa〜gに該当するものを選択し、モデルを完成させなさい。`,
-		Image:    "/classdiagram.png",
+		Image:    "https://firebasestorage.googleapis.com/v0/b/umtp-learning.firebasestorage.app/o/classdiagram.png?alt=media&token=76ecd79f-1317-42a5-bcc9-c31278982abc",
 		ClassDiagramPlantUML: `@startuml 
 class a 
 class b 
@@ -114,7 +114,7 @@ f はその自社に必ず1個ひも付く 診断結果 → f ＝ 診断結果 (
 診断結果 f がさらに e を複数個もつ
 問題文の「収益性・効率性・安全性・成長性の診断指標」がここに該当。
 e ＝ 診断指標 (A)答え（a〜g に入る選択肢）`,
-		Image: "/classdiagram2.png",
+		Image: "https://firebasestorage.googleapis.com/v0/b/umtp-learning.firebasestorage.app/o/classdiagram2.png?alt=media&token=7555a4dd-7e75-4d11-ae95-47a37aecbc53",
 		ClassDiagramPlantUML: `@startuml 
 class a { } 
 class b { } 
@@ -153,7 +153,7 @@ f "1" o-- "l" e
 登録には、パスポートの情報およびクレジットカードの情報が必要になります。
 電子ビザには、観光用と短期商用のものがあります。観光用のものは、有効期限内ならば何回でも使用できますが、短期商用のものは1回限りです。`,
 		Question: `次のクラス図のa~gに該当するものを選択しなさい。`,
-		Image:    "/classdiagram3.png",
+		Image:    "https://firebasestorage.googleapis.com/v0/b/umtp-learning.firebasestorage.app/o/classdiagram3.png?alt=media&token=79667b65-8f9e-483b-8b87-12ee1d943a3f",
 		ClassDiagramPlantUML: `@startuml
 class b { 
 i 
