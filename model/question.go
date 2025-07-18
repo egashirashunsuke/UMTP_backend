@@ -5,14 +5,16 @@ import (
 )
 
 type Question struct {
-	ID                 int      `json:"id" gorm:"primaryKey"`
-	ProblemDescription string   `json:"problem_description"`
-	Question           string   `json:"question"`
-	AnswerProcess	  string   `json:"answer_process"`
-	Image              string   `json:"image"`
-	ClassDiagramPlantUML string `json:"class_diagram_plantuml"`
-	Choices            []Choice `json:"choices" gorm:"foreignKey:QuestionID"`
-	CreatedAt          string   `json:"created_at"`
+	ID                   int             `json:"id" gorm:"primaryKey"`
+	ProblemDescription   string          `json:"problem_description"`
+	Question             string          `json:"question"`
+	AnswerProcess        string          `json:"answer_process"`
+	ClassDiagramImage    string          `json:"image"`
+	ClassDiagramPlantUML string          `json:"class_diagram_plantuml"`
+	Choices              []Choice        `json:"choices" gorm:"foreignKey:QuestionID"`
+	Labels               []Label         `json:"labels" gorm:"foreignKey:QuestionID"`
+	AnswerMappings       []AnswerMapping `json:"answer_mappings" gorm:"foreignKey:QuestionID"`
+	CreatedAt            string          `json:"created_at"`
 }
 
 func GetQuestionByID(db *gorm.DB, id int) (*Question, error) {
