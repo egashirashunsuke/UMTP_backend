@@ -1,6 +1,10 @@
 package model
 
 import (
+	"fmt"
+	"log"
+
+	"github.com/egashirashunsuke/UMTP_backend/dto"
 	"gorm.io/gorm"
 )
 
@@ -14,7 +18,7 @@ type Question struct {
 	Choices              []Choice        `json:"choices" gorm:"foreignKey:QuestionID"`
 	Labels               []Label         `json:"labels" gorm:"foreignKey:QuestionID"`
 	AnswerMappings       []AnswerMapping `json:"answer_mappings" gorm:"foreignKey:QuestionID"`
-	CreatedAt            string          `json:"created_at"`
+	CreatedAt            int64           `gorm:"autoCreateTime"`
 }
 
 func GetQuestionByID(db *gorm.DB, id int) (*Question, error) {
@@ -23,4 +27,66 @@ func GetQuestionByID(db *gorm.DB, id int) (*Question, error) {
 		return nil, err
 	}
 	return &question, nil
+}
+
+func CreateQuestionWithAssociations(db *gorm.DB, in *dto.CreateQuestionDTO) error {
+	return db.Transaction(func(tx *gorm.DB) error {
+		q := Question{
+			ProblemDescription:   in.ProblemDescription,
+			Question:             in.Question,
+			ClassDiagramImage:    in.ClassDiagramImage,
+			ClassDiagramPlantUML: in.ClassDiagramPlantUML,
+		}
+		if err := tx.Create(&q).Error; err != nil {
+			return err
+		}
+
+		// 2) Choices を Insert & code→ID マップ作成
+		choiceMap := make(map[string]int)
+		for _, ci := range in.Choices {
+			ch := Choice{
+				QuestionID: q.ID,
+				ChoiceCode: ci.ChoiceCode,
+				ChoiceText: ci.ChoiceText,
+			}
+			if err := tx.Create(&ch).Error; err != nil {
+				return err
+			}
+			choiceMap[ci.ChoiceCode] = ch.ID
+		}
+
+		labelMap := make(map[string]int)
+		for _, li := range in.Labels {
+			lb := Label{
+				QuestionID: q.ID,
+				LabelCode:  li.LabelCode,
+			}
+			if err := tx.Create(&lb).Error; err != nil {
+				return err
+			}
+			labelMap[li.LabelCode] = lb.ID
+		}
+		log.Printf("Created question %d with choices %v and labels %v", q.ID, choiceMap, labelMap)
+
+		var mappings []AnswerMapping
+		for _, am := range in.AnswerMappings {
+			cid, okc := choiceMap[am.ChoiceCode]
+			lid, okl := labelMap[am.LabelCode]
+			if !okc || !okl {
+				return fmt.Errorf("invalid mapping: %s→%s", am.ChoiceCode, am.LabelCode)
+			}
+			mappings = append(mappings, AnswerMapping{
+				QuestionID: q.ID,
+				ChoiceID:   cid,
+				LabelID:    lid,
+			})
+		}
+		if len(mappings) > 0 {
+			if err := tx.Create(&mappings).Error; err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
 }
