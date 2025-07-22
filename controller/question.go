@@ -11,6 +11,7 @@ import (
 
 type IQuestionController interface {
 	GetQuestionByID(c echo.Context) error
+	GetAllQuestions(c echo.Context) error
 }
 
 type questionController struct {
@@ -37,4 +38,17 @@ func (h *questionController) GetQuestionByID(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, question)
+}
+
+func (h *questionController) GetAllQuestions(c echo.Context) error {
+
+	questions, err := h.uu.GetAllQuestions()
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return c.JSON(http.StatusNotFound, map[string]string{"error": "not found"})
+		}
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, questions)
 }

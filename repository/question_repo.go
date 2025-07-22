@@ -11,6 +11,7 @@ import (
 
 type IQuestionRepository interface {
 	GetQuestionByID(id int) (*model.Question, error)
+	GetAllQuestions() (*[]model.Question, error)
 	CreateQuestionWithAssociations(in *dto.CreateQuestionDTO) error
 }
 
@@ -28,6 +29,17 @@ func (r *questionRepository) GetQuestionByID(id int) (*model.Question, error) {
 		return nil, err
 	}
 	return &question, nil
+}
+
+func (r *questionRepository) GetAllQuestions() (*[]model.Question, error) {
+	var questions []model.Question
+	if err := r.db.Preload("Choices").Find(&questions).Error; err != nil {
+		return nil, fmt.Errorf("failed to get all questions: %w", err)
+	}
+	if len(questions) == 0 {
+		return nil, gorm.ErrRecordNotFound
+	}
+	return &questions, nil
 }
 
 func (r *questionRepository) CreateQuestionWithAssociations(in *dto.CreateQuestionDTO) error {

@@ -44,6 +44,7 @@ func main() {
 		return c.String(http.StatusOK, "OK")
 	})
 	e.GET("/question/:questionID", qCtrl.GetQuestionByID)
+	e.GET("/questions", qCtrl.GetAllQuestions)
 
 	// e.POST("/:questionID", handler.NewHintsHandler(db).GetHints)
 	// e.GET("/questions", handler.NewQuestionHandler(db).GetAllQuestions)
