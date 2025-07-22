@@ -4,9 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/egashirashunsuke/UMTP_backend/model"
-	"github.com/egashirashunsuke/UMTP_backend/service"
-	"gorm.io/gorm"
+	"github.com/egashirashunsuke/UMTP_backend/usecase"
 
 	"github.com/labstack/echo/v4"
 )
@@ -15,19 +13,19 @@ type SubmitAnswerRequest struct {
 	Answers map[string]*string `json:"answers"`
 }
 
-type HintsHandler struct {
-	hintsSvc service.HintsService
-	DB       *gorm.DB
+type IHintsController interface {
+	GetHints(c echo.Context) error
 }
 
-func NewHintsHandler(db *gorm.DB) *HintsHandler {
-	return &HintsHandler{
-		hintsSvc: service.NewHintsService(),
-		DB:       db,
-	}
+type hintsController struct {
+	uu usecase.IHintsUsecase
 }
 
-func (h *HintsHandler) GetHints(c echo.Context) error {
+func NewHintsController(uu usecase.IHintsUsecase) IHintsController {
+	return &hintsController{uu: uu}
+}
+
+func (h *hintsController) GetHints(c echo.Context) error {
 	var req SubmitAnswerRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "リクエストのバインドに失敗しました"})
@@ -39,15 +37,15 @@ func (h *HintsHandler) GetHints(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid questionID"})
 	}
 
-	question, err := model.GetQuestionByID(h.DB, id)
-	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "question not found"})
-	}
-
-	answer, err := h.hintsSvc.GetHints(c.Request().Context(), question, req.Answers)
+	out, err := h.uu.GetHints(c.Request().Context(),
+		usecase.GenerateHintInput{
+			QuestionID: id,
+			Answers:    req.Answers,
+		})
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{"answer": answer})
+	// 3) 結果返却
+	return c.JSON(http.StatusOK, out)
 }

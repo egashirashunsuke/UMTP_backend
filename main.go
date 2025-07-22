@@ -8,6 +8,7 @@ import (
 	"github.com/egashirashunsuke/UMTP_backend/controller"
 	"github.com/egashirashunsuke/UMTP_backend/model"
 	"github.com/egashirashunsuke/UMTP_backend/repository"
+	"github.com/egashirashunsuke/UMTP_backend/service"
 	"github.com/egashirashunsuke/UMTP_backend/usecase"
 	"github.com/joho/godotenv"
 
@@ -36,8 +37,14 @@ func main() {
 	}))
 
 	qRepo := repository.NewQuestionRepository(db)
+
+	hintGen := service.NewHintsService()
+
 	qUsecase := usecase.NewQuestionUsecase(qRepo)
+	hUC := usecase.NewHintsUsecase(qRepo, hintGen)
+
 	qCtrl := controller.NewQuestionController(qUsecase)
+	hCtl := controller.NewHintsController(hUC)
 
 	//ルーティング
 	e.GET("/health", func(c echo.Context) error {
@@ -46,9 +53,9 @@ func main() {
 	e.GET("/question/:questionID", qCtrl.GetQuestionByID)
 	e.GET("/questions", qCtrl.GetAllQuestions)
 	e.POST("/question", qCtrl.CreateQuestion)
+	e.POST("/question/:questionID/hints", hCtl.GetHints)
 
 	// e.POST("/:questionID", handler.NewHintsHandler(db).GetHints)
-	// e.POST("/question", handler.NewQuestionHandler(db).CreateQuestion)
 
 	// PORT環境変数を取得し、なければ10000を使う
 	port := os.Getenv("PORT")

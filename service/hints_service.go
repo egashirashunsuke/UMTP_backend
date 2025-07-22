@@ -11,6 +11,7 @@ import (
 	"text/template"
 
 	"github.com/egashirashunsuke/UMTP_backend/model"
+	"github.com/egashirashunsuke/UMTP_backend/usecase"
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/option"
 )
@@ -24,11 +25,6 @@ type PromptData struct {
 	Steps                string
 }
 
-// HintsService はビジネスロジック層のインターフェース（テスト用に実装差し替えしやすくするため）
-type HintsService interface {
-	GetHints(ctx context.Context, question *model.Question, answer map[string]*string) (string, error)
-}
-
 // hintsServiceImpl は実際の実装
 type hintsServiceImpl struct {
 	client openai.Client
@@ -36,7 +32,7 @@ type hintsServiceImpl struct {
 }
 
 // NewHintsService は HintsService を生成するコンストラクタ
-func NewHintsService() HintsService {
+func NewHintsService() usecase.HintGenerator {
 	apiKey := os.Getenv("OPENAI_API_KEY")
 	if apiKey == "" {
 		// アプリ起動時に .env または環境変数に設定がないとパニックにする
@@ -58,7 +54,7 @@ func NewHintsService() HintsService {
 }
 
 // GetHints は OpenAI の ChatCompletion を呼び出し、返ってきたテキストを返す
-func (s *hintsServiceImpl) GetHints(ctx context.Context, question *model.Question, answers map[string]*string) (string, error) {
+func (s *hintsServiceImpl) Generate(ctx context.Context, question *model.Question, answers map[string]*string) (string, error) {
 
 	var keys []string
 	for k := range answers {
