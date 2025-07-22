@@ -45,9 +45,9 @@ func main() {
 	})
 	e.GET("/question/:questionID", qCtrl.GetQuestionByID)
 	e.GET("/questions", qCtrl.GetAllQuestions)
+	e.POST("/question", qCtrl.CreateQuestion)
 
 	// e.POST("/:questionID", handler.NewHintsHandler(db).GetHints)
-	// e.GET("/questions", handler.NewQuestionHandler(db).GetAllQuestions)
 	// e.POST("/question", handler.NewQuestionHandler(db).CreateQuestion)
 
 	// PORT環境変数を取得し、なければ10000を使う
