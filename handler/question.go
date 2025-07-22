@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/egashirashunsuke/UMTP_backend/dto"
 	"github.com/egashirashunsuke/UMTP_backend/model"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
@@ -45,14 +46,16 @@ func (h *QuestionHandler) GetAllQuestions(c echo.Context) error {
 }
 
 func (h *QuestionHandler) CreateQuestion(c echo.Context) error {
-	var question model.Question
-	if err := c.Bind(&question); err != nil {
+	var q dto.CreateQuestionDTO
+	if err := c.Bind(&q); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid input"})
 	}
 
-	if err := h.DB.Create(&question).Error; err != nil {
+	// モデル層に丸投げ
+	if err := model.CreateQuestionWithAssociations(h.DB, &q); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
-	return c.JSON(http.StatusCreated, question)
+	// 保存後の q.ID, CreatedAt, Choices[].ID などもセット済み
+	return c.JSON(http.StatusCreated, q)
 }

@@ -23,13 +23,13 @@ func SeedDate(db *gorm.DB) error {
 次のクラス図のa~gに該当するものを選択しなさい。
 なお、該当する選択肢が複数ある場合は、選択肢のアルファベットの早い順に選択しなさい。`,
 		Choices: []Choice{
-			{Label: "A", Text: "診断指標"},
-			{Label: "B", Text: "基本データ"},
-			{Label: "C", Text: "診断結果"},
-			{Label: "D", Text: "会社情報"},
-			{Label: "E", Text: "財務データ"},
-			{Label: "F", Text: "自社情報"},
-			{Label: "G", Text: "業種"},
+			{ChoiceCode: "A", ChoiceText: "診断指標"},
+			{ChoiceCode: "B", ChoiceText: "基本データ"},
+			{ChoiceCode: "C", ChoiceText: "診断結果"},
+			{ChoiceCode: "D", ChoiceText: "会社情報"},
+			{ChoiceCode: "E", ChoiceText: "財務データ"},
+			{ChoiceCode: "F", ChoiceText: "自社情報"},
+			{ChoiceCode: "G", ChoiceText: "業種"},
 		},
 	}
 	if err := db.

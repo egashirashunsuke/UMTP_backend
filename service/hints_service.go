@@ -127,11 +127,11 @@ func BuildPrompt(data PromptData) (string, error) {
 func FormatChoices(choices []model.Choice) string {
 	// ラベル順にソート
 	sort.Slice(choices, func(i, j int) bool {
-		return choices[i].Label < choices[j].Label
+		return choices[i].ChoiceCode < choices[j].ChoiceCode
 	})
 	var sb strings.Builder
 	for _, c := range choices {
-		sb.WriteString(fmt.Sprintf("%s. %s\n", c.Label, c.Text))
+		sb.WriteString(fmt.Sprintf("%s. %s\n", c.ChoiceCode, c.ChoiceText))
 	}
 	return sb.String()
 }
