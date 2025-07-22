@@ -25,9 +25,20 @@ func NewQuestionRepository(db *gorm.DB) IQuestionRepository {
 
 func (r *questionRepository) GetQuestionByID(id int) (*model.Question, error) {
 	var question model.Question
-	if err := r.db.Preload("Choices").First(&question, id).Error; err != nil {
+	if err := r.db.Preload("Choices").Preload("AnswerMappings.Choice").
+		Preload("AnswerMappings.Label").
+		Preload("Choices").
+		Preload("Labels").First(&question, id).Error; err != nil {
 		return nil, err
 	}
+	log.Printf("[repo] loaded: choices=%d labels=%d am=%d",
+		len(question.Choices), len(question.Labels), len(question.AnswerMappings))
+
+	for i, am := range question.AnswerMappings {
+		log.Printf("[repo] AM[%d] label=%s choice=%s",
+			i, am.Label.LabelCode, am.Choice.ChoiceCode)
+	}
+
 	return &question, nil
 }
 
