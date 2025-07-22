@@ -5,8 +5,10 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/egashirashunsuke/UMTP_backend/handler"
+	"github.com/egashirashunsuke/UMTP_backend/controller"
 	"github.com/egashirashunsuke/UMTP_backend/model"
+	"github.com/egashirashunsuke/UMTP_backend/repository"
+	"github.com/egashirashunsuke/UMTP_backend/usecase"
 	"github.com/joho/godotenv"
 
 	"github.com/labstack/echo/v4"
@@ -33,15 +35,19 @@ func main() {
 		// 必要に応じて PUT, DELETE, OPTIONS なども追加
 	}))
 
+	qRepo := repository.NewQuestionRepository(db)
+	qUsecase := usecase.NewQuestionUsecase(qRepo)
+	qCtrl := controller.NewQuestionController(qUsecase)
+
 	//ルーティング
 	e.GET("/health", func(c echo.Context) error {
 		return c.String(http.StatusOK, "OK")
 	})
-	e.POST("/:questionID", handler.NewHintsHandler(db).GetHints)
+	e.GET("/question/:questionID", qCtrl.GetQuestionByID)
 
-	e.GET("/question/:questionID", handler.NewQuestionHandler(db).GetQuestionByID)
-	e.GET("/questions", handler.NewQuestionHandler(db).GetAllQuestions)
-	e.POST("/question", handler.NewQuestionHandler(db).CreateQuestion)
+	// e.POST("/:questionID", handler.NewHintsHandler(db).GetHints)
+	// e.GET("/questions", handler.NewQuestionHandler(db).GetAllQuestions)
+	// e.POST("/question", handler.NewQuestionHandler(db).CreateQuestion)
 
 	// PORT環境変数を取得し、なければ10000を使う
 	port := os.Getenv("PORT")
