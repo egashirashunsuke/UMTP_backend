@@ -90,3 +90,25 @@ func CreateQuestionWithAssociations(db *gorm.DB, in *dto.CreateQuestionDTO) erro
 		return nil
 	})
 }
+
+func (q *Question) Check(ans map[string]*string) (bool, string) {
+	// 正解マッピングを作成
+	correct := make(map[string]string) // label_code -> choice_code
+	for _, am := range q.AnswerMappings {
+		// ChoiceとLabelをPreloadしておく必要あり
+		correct[am.Label.LabelCode] = am.Choice.ChoiceCode
+	}
+
+	// 回答を比較
+	for label, userChoicePtr := range ans {
+		userChoice := ""
+		if userChoicePtr != nil {
+			userChoice = *userChoicePtr
+		}
+		if correctChoice, ok := correct[label]; !ok || userChoice != correctChoice {
+			return false, "不正解" // 不正解
+		}
+	}
+
+	return true, "正解" // 全て一致なら正解
+}
