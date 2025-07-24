@@ -13,6 +13,7 @@ type IQuestionRepository interface {
 	GetQuestionByID(id int) (*model.Question, error)
 	GetAllQuestions() (*[]model.Question, error)
 	CreateQuestionWithAssociations(in *dto.CreateQuestionDTO) error
+	GetNextQuestionByID(currentID int) (model.Question, error)
 }
 
 type questionRepository struct {
@@ -113,4 +114,12 @@ func (r *questionRepository) CreateQuestionWithAssociations(in *dto.CreateQuesti
 
 		return nil
 	})
+}
+
+func (r *questionRepository) GetNextQuestionByID(currentID int) (model.Question, error) {
+	var nextQuestion model.Question
+	if err := r.db.Where("id > ?", currentID).Order("id ASC").First(&nextQuestion).Error; err != nil {
+		return model.Question{}, fmt.Errorf("failed to get next question after ID %d: %w", currentID, err)
+	}
+	return nextQuestion, nil
 }
