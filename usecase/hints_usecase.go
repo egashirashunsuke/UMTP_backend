@@ -13,8 +13,9 @@ type GenerateHintInput struct {
 	Answers    map[string]*string
 }
 type GenerateHintOutput struct {
-	Correct bool   `json:"correct"`
-	Message string `json:"message"` // 正解時メッセージ or 不正解時ヒント
+	Correct bool     `json:"correct"`
+	Message string   `json:"message"`
+	Hints   []string `json:"hints"` // ヒントのリスト
 }
 
 type IHintsUsecase interface {
@@ -22,7 +23,7 @@ type IHintsUsecase interface {
 }
 
 type HintGenerator interface {
-	Generate(ctx context.Context, q *model.Question, answers map[string]*string) (string, error)
+	Generate(ctx context.Context, q *model.Question, answers map[string]*string) ([]string, error)
 }
 
 type hintsUsecase struct {
@@ -58,6 +59,6 @@ func (u *hintsUsecase) GetHints(ctx context.Context, in GenerateHintInput) (*Gen
 
 	return &GenerateHintOutput{
 		Correct: false,
-		Message: hint,
+		Hints:   hint,
 	}, nil
 }

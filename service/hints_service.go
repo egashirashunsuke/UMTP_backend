@@ -3,6 +3,7 @@ package service
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -23,6 +24,9 @@ type PromptData struct {
 	Choices              string
 	StudentAnswers       string
 	Steps                string
+}
+type HintsResponse struct {
+	Hints []string `json:"hints"`
 }
 
 // hintsServiceImpl は実際の実装
@@ -54,7 +58,7 @@ func NewHintsService() usecase.HintGenerator {
 }
 
 // GetHints は OpenAI の ChatCompletion を呼び出し、返ってきたテキストを返す
-func (s *hintsServiceImpl) Generate(ctx context.Context, question *model.Question, answers map[string]*string) (string, error) {
+func (s *hintsServiceImpl) Generate(ctx context.Context, question *model.Question, answers map[string]*string) ([]string, error) {
 
 	var keys []string
 	for k := range answers {
@@ -80,7 +84,7 @@ func (s *hintsServiceImpl) Generate(ctx context.Context, question *model.Questio
 		Steps:                question.AnswerProcess,
 	})
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	fmt.Println("=== OpenAIへ送るプロンプト ===")
@@ -97,15 +101,21 @@ func (s *hintsServiceImpl) Generate(ctx context.Context, question *model.Questio
 		Model:    s.model,
 	})
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if len(resp.Choices) == 0 {
-		return "", errors.New("OpenAI からの応答が空です")
+		return nil, errors.New("OpenAI からの応答が空です")
 	}
 
-	// 返ってきた最初の選択肢を文字列として返却
-	return resp.Choices[0].Message.Content, nil
+	content := resp.Choices[0].Message.Content
+
+	var hintsResp HintsResponse
+	if err := json.Unmarshal([]byte(content), &hintsResp); err != nil {
+		return nil, fmt.Errorf("failed to parse hints JSON: %w", err)
+	}
+
+	return hintsResp.Hints, nil
 }
 
 func BuildPrompt(data PromptData) (string, error) {
