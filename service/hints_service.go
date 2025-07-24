@@ -108,6 +108,7 @@ func (s *hintsServiceImpl) Generate(ctx context.Context, question *model.Questio
 		return nil, errors.New("OpenAI からの応答が空です")
 	}
 
+	fmt.Println(resp.Choices[0].Message.Content)
 	content := resp.Choices[0].Message.Content
 
 	var hintsResp HintsResponse
