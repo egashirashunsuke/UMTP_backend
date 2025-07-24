@@ -54,8 +54,7 @@ func main() {
 	e.GET("/questions", qCtrl.GetAllQuestions)
 	e.POST("/question", qCtrl.CreateQuestion)
 	e.POST("/question/:questionID/hints", hCtl.GetHints)
-
-	// e.POST("/:questionID", handler.NewHintsHandler(db).GetHints)
+	e.GET("/question/:id/next", qCtrl.GetNextQuestion)
 
 	// PORT環境変数を取得し、なければ10000を使う
 	port := os.Getenv("PORT")
