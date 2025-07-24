@@ -13,6 +13,7 @@ type IQuestionUsecase interface {
 	GetAllQuestions() ([]model.Question, error)
 	CreateQuestion(in *dto.CreateQuestionDTO) error
 	GetNextQuestion(currentID int) (model.Question, error)
+	GetPrevQuestion(currentID int) (model.Question, error)
 }
 
 type questionUsecase struct {
@@ -53,4 +54,13 @@ func (uc *questionUsecase) GetNextQuestion(currentID int) (model.Question, error
 		return model.Question{}, fmt.Errorf("failed to get next question after ID %d: %w", currentID, err)
 	}
 	return nextQuestion, nil
+}
+
+func (uc *questionUsecase) GetPrevQuestion(currentID int) (model.Question, error) {
+	// 現在のIDより小さい最大のIDを持つ質問を取得
+	prevQuestion, err := uc.qr.GetPrevQuestionByID(currentID - 1)
+	if err != nil {
+		return model.Question{}, fmt.Errorf("failed to get previous question before ID %d: %w", currentID, err)
+	}
+	return prevQuestion, nil
 }
