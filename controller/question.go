@@ -15,6 +15,7 @@ type IQuestionController interface {
 	GetAllQuestions(c echo.Context) error
 	CreateQuestion(c echo.Context) error
 	GetNextQuestion(c echo.Context) error
+	GetPrevQuestion(c echo.Context) error
 }
 
 type questionController struct {
@@ -85,4 +86,22 @@ func (h *questionController) GetNextQuestion(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, nextQuestion)
+}
+
+func (h *questionController) GetPrevQuestion(c echo.Context) error {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid id"})
+	}
+
+	prevQuestion, err := h.uu.GetPrevQuestion(id)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return c.JSON(http.StatusNotFound, map[string]string{"error": "not found"})
+		}
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, prevQuestion)
 }
