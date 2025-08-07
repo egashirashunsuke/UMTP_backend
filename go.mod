@@ -3,6 +3,7 @@ module github.com/egashirashunsuke/UMTP_backend
 go 1.24.2
 
 require (
+	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/openai/openai-go v0.1.0-beta.10
