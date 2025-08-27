@@ -46,6 +46,10 @@ func main() {
 	qCtrl := controller.NewQuestionController(qUsecase)
 	hCtl := controller.NewHintsController(hUC)
 
+	lRepo := repository.NewLogRepository(db)
+	lUsecase := usecase.NewLogUsecase(lRepo)
+	lCtl := controller.NewLogController(lUsecase)
+
 	//ルーティング
 	e.GET("/health", func(c echo.Context) error {
 		return c.String(http.StatusOK, "OK")
@@ -56,6 +60,8 @@ func main() {
 	e.POST("/question/:questionID/hints", hCtl.GetHints)
 	e.GET("/question/:id/next", qCtrl.GetNextQuestion)
 	e.GET("/question/:id/prev", qCtrl.GetPrevQuestion)
+
+	e.POST("/api/log", lCtl.SendLog)
 
 	// PORT環境変数を取得し、なければ10000を使う
 	port := os.Getenv("PORT")

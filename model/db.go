@@ -44,7 +44,7 @@ func GetDBConfig() string {
 
 func CreateTable(db *gorm.DB) {
 	// テーブル作成
-	db.AutoMigrate(&Question{}, &Choice{}, &Label{}, &AnswerMapping{})
+	db.AutoMigrate(&Question{}, &Choice{}, &Label{}, &AnswerMapping{}, &OperationLog{})
 
 	// サンプルQuestion
 	question := Question{
