@@ -60,6 +60,7 @@ func (r *questionRepository) CreateQuestionWithAssociations(in *dto.CreateQuesti
 		q := model.Question{
 			ProblemDescription:   in.ProblemDescription,
 			Question:             in.Question,
+			AnswerProcess:        in.AnswerProcess,
 			ClassDiagramImage:    in.ClassDiagramImage,
 			ClassDiagramPlantUML: in.ClassDiagramPlantUML,
 		}
@@ -67,7 +68,6 @@ func (r *questionRepository) CreateQuestionWithAssociations(in *dto.CreateQuesti
 			return err
 		}
 
-		// 2) Choices を Insert & code→ID マップ作成
 		choiceMap := make(map[string]int)
 		for _, ci := range in.Choices {
 			ch := model.Choice{
@@ -82,24 +82,23 @@ func (r *questionRepository) CreateQuestionWithAssociations(in *dto.CreateQuesti
 		}
 
 		labelMap := make(map[string]int)
-		for _, li := range in.Labels {
+		for _, am := range in.AnswerMappings {
 			lb := model.Label{
 				QuestionID: q.ID,
-				LabelCode:  li.LabelCode,
+				LabelCode:  am.Blank,
 			}
 			if err := tx.Create(&lb).Error; err != nil {
 				return err
 			}
-			labelMap[li.LabelCode] = lb.ID
+			labelMap[am.Blank] = lb.ID
 		}
-		log.Printf("Created question %d with choices %v and labels %v", q.ID, choiceMap, labelMap)
 
 		var mappings []model.AnswerMapping
 		for _, am := range in.AnswerMappings {
 			cid, okc := choiceMap[am.ChoiceCode]
-			lid, okl := labelMap[am.LabelCode]
+			lid, okl := labelMap[am.Blank]
 			if !okc || !okl {
-				return fmt.Errorf("invalid mapping: %s→%s", am.ChoiceCode, am.LabelCode)
+				return fmt.Errorf("invalid mapping: %s→%s", am.ChoiceCode, am.Blank)
 			}
 			mappings = append(mappings, model.AnswerMapping{
 				QuestionID: q.ID,
