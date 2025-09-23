@@ -19,29 +19,26 @@ type Question struct {
 }
 
 func (q *Question) Check(ans map[string]*string) (bool, string) {
-	// 正解マップ作成
-	correct := make(map[string]string) // label_code -> choice_code
+	correct := make(map[string]string)
 	for _, am := range q.AnswerMappings {
 		correct[am.Label.LabelCode] = am.Choice.ChoiceCode
 	}
 
 	var errs []string
 
-	// 必須ラベルが全部答えられているか & 内容一致確認
 	for label, want := range correct {
 		got := ""
 		if v, ok := ans[label]; ok && v != nil {
 			got = strings.TrimSpace(*v)
-		} else {
-			errs = append(errs, fmt.Sprintf("%s が未回答です", label))
-			continue
+			// 回答があればチェック
+			if got != "" && got != want {
+				errs = append(errs, fmt.Sprintf("%s の正解は %s（あなた: %s）", label, want, got))
+			}
 		}
-		if got != want {
-			errs = append(errs, fmt.Sprintf("%s の正解は %s（あなた: %s）", label, want, got))
-		}
+		// 未回答は無視（エラーにしない）
 	}
 
-	// 余分なラベルが来ていないか
+	// 不要なラベルはエラーにする
 	for label := range ans {
 		if _, ok := correct[label]; !ok {
 			errs = append(errs, fmt.Sprintf("不要なラベル %s が含まれています", label))
@@ -51,5 +48,5 @@ func (q *Question) Check(ans map[string]*string) (bool, string) {
 	if len(errs) > 0 {
 		return false, strings.Join(errs, "\n")
 	}
-	return true, "正解！"
+	return true, "現在の回答は途中まで正しいです"
 }

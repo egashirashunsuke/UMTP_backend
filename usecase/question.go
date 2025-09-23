@@ -14,6 +14,7 @@ type IQuestionUsecase interface {
 	CreateQuestion(in *dto.CreateQuestionDTO) error
 	GetNextQuestion(currentID int) (model.Question, error)
 	GetPrevQuestion(currentID int) (model.Question, error)
+	CheckAnswer(questionID int, answers map[string]*string) (bool, error)
 }
 
 type questionUsecase struct {
@@ -63,4 +64,15 @@ func (uc *questionUsecase) GetPrevQuestion(currentID int) (model.Question, error
 		return model.Question{}, fmt.Errorf("failed to get previous question before ID %d: %w", currentID, err)
 	}
 	return prevQuestion, nil
+}
+
+func (uc *questionUsecase) CheckAnswer(questionID int, answers map[string]*string) (bool, error) {
+	q, err := uc.qr.GetQuestionByID(questionID)
+	if err != nil {
+		return false, fmt.Errorf("問題取得失敗: %w", err)
+	}
+
+	ok, msg := q.Check(answers)
+	fmt.Println(msg)
+	return ok, nil
 }
