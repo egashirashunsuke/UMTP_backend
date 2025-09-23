@@ -57,7 +57,11 @@ func main() {
 	e.GET("/question/:questionID", qCtrl.GetQuestionByID)
 	e.GET("/questions", qCtrl.GetAllQuestions)
 	e.POST("/question", qCtrl.CreateQuestion)
+
 	e.POST("/question/:questionID/hints", hCtl.GetHints)
+
+	e.POST("/question/:questionID/check", qCtrl.CheckAnswer)
+
 	e.GET("/question/:id/next", qCtrl.GetNextQuestion)
 	e.GET("/question/:id/prev", qCtrl.GetPrevQuestion)
 

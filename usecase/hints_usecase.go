@@ -42,15 +42,6 @@ func (u *hintsUsecase) GetHints(ctx context.Context, in GenerateHintInput) (*Gen
 		return nil, fmt.Errorf("問題取得失敗: %w", err)
 	}
 
-	// 2) 正誤判定（モデル側にメソッドがある想定）
-	ok, msg := q.Check(in.Answers) // 例: (bool, string) を返す
-	if ok {
-		return &GenerateHintOutput{
-			Correct: true,
-			Message: msg,
-		}, nil
-	}
-
 	// 3) 不正解ならヒント生成（AI など）
 	hint, err := u.hg.Generate(ctx, q, in.Answers)
 	if err != nil {

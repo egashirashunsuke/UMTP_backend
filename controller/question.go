@@ -16,6 +16,7 @@ type IQuestionController interface {
 	CreateQuestion(c echo.Context) error
 	GetNextQuestion(c echo.Context) error
 	GetPrevQuestion(c echo.Context) error
+	CheckAnswer(c echo.Context) error
 }
 
 type questionController struct {
@@ -104,4 +105,27 @@ func (h *questionController) GetPrevQuestion(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, prevQuestion)
+}
+
+func (h *questionController) CheckAnswer(c echo.Context) error {
+	var req SubmitAnswerRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "リクエストのバインドに失敗しました"})
+	}
+
+	idStr := c.Param("questionID")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid questionID"})
+	}
+
+	out, err := h.uu.CheckAnswer(id, req.Answers)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	// 3) 結果返却
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"correct": out,
+	})
 }
