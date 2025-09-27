@@ -50,7 +50,7 @@ func (uc *questionUsecase) CreateQuestion(in *dto.CreateQuestionDTO) error {
 
 func (uc *questionUsecase) GetNextQuestion(currentID int) (model.Question, error) {
 	// 現在のIDより大きい最小のIDを持つ質問を取得
-	nextQuestion, err := uc.qr.GetNextQuestionByID(currentID + 1)
+	nextQuestion, err := uc.qr.GetNextQuestionByID(currentID)
 	if err != nil {
 		return model.Question{}, fmt.Errorf("failed to get next question after ID %d: %w", currentID, err)
 	}
@@ -59,7 +59,7 @@ func (uc *questionUsecase) GetNextQuestion(currentID int) (model.Question, error
 
 func (uc *questionUsecase) GetPrevQuestion(currentID int) (model.Question, error) {
 	// 現在のIDより小さい最大のIDを持つ質問を取得
-	prevQuestion, err := uc.qr.GetPrevQuestionByID(currentID - 1)
+	prevQuestion, err := uc.qr.GetPrevQuestionByID(currentID)
 	if err != nil {
 		return model.Question{}, fmt.Errorf("failed to get previous question before ID %d: %w", currentID, err)
 	}
