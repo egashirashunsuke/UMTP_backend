@@ -29,7 +29,7 @@ func main() {
 	e := echo.New()
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{
-			"http://localhost:5173",
+			"https://localhost:5173",
 			"https://umtp-shunsuke-egashiras-projects.vercel.app",
 		},
 		AllowMethods: []string{http.MethodGet, http.MethodPost},

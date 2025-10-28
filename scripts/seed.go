@@ -566,7 +566,8 @@ class g {
 }
 class 病原体 {
 }
-class 外科的治療 {}
+class 外科的治療 {
+}
 a <|-- d
 a <|-- 外科的治療
 a "h" -- "i" b

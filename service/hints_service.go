@@ -48,7 +48,7 @@ func NewHintsService() usecase.HintGenerator {
 	// モデル名は環境変数 OPENAI_MODEL で上書きできるようにする
 	model := os.Getenv("OPENAI_MODEL")
 	if model == "" {
-		model = string(openai.ChatModelGPT4o) // デフォルトを GPT-4o に設定
+		model = "gpt-5"
 	}
 
 	return &hintsServiceImpl{
