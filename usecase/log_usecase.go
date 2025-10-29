@@ -18,6 +18,9 @@ type LogData struct {
 	HintOpenStatus map[string]bool    `json:"hint_open_status"`
 	Hints          map[string]*string `json:"hints"`
 	Timestamp      string             `json:"timestamp"`
+	HintIndex      *int               `json:"hintIndex"`
+	Useful         *int               `json:"useful"`
+	Comment        *string            `json:"comment"`
 }
 
 type ILogUsecase interface {
@@ -41,6 +44,15 @@ func (lu *LogUsecase) SendLog(logdata *LogData) error {
 		"answers":          logdata.Answers,
 		"hint_open_status": logdata.HintOpenStatus,
 		"hints":            logdata.Hints,
+	}
+	if logdata.HintIndex != nil {
+		detailsMap["hintIndex"] = *logdata.HintIndex
+	}
+	if logdata.Useful != nil {
+		detailsMap["useful"] = *logdata.Useful
+	}
+	if logdata.Comment != nil {
+		detailsMap["comment"] = *logdata.Comment
 	}
 
 	detailsJSON, err := json.Marshal(detailsMap)
