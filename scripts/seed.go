@@ -30,6 +30,7 @@ func seedQuestions(db *gorm.DB) error {
 	seeds := []QuestionSeed{
 		{
 			Question: model.Question{
+				OrderIndex: 1,
 				ProblemDescription: `
 市営駐輪場の利用申し込みシステムです。
 この市には第1と第2の駐輪場があります。それぞれの駐輪場で、月額料金は異なります。
@@ -92,6 +93,7 @@ e <|-- g
 		},
 		{
 			Question: model.Question{
+				OrderIndex: 2,
 				ProblemDescription: `
 経営診断システムの開発を検討しています。
 診断する会社についての以下の情報を入力することで、会社の経営診断結果が表示されます。
@@ -158,6 +160,7 @@ f "1" --o "1" g
 		},
 		{
 			Question: model.Question{
+				OrderIndex: 3,
 				ProblemDescription: `
 ある国では、電子入国許可システムを採用しています。
 申請者が、Web上から電子ビザの登録を申請すると、参照番号が発行されます。
@@ -233,6 +236,7 @@ c o-- "クレジットカード"
 		},
 		{
 			Question: model.Question{
+				OrderIndex: 4,
 				ProblemDescription: `
 ある中学校です。
 1年〜3年まで3学年あり、1学年にはそれぞれ5つのクラスがあります。
@@ -290,6 +294,7 @@ c "1..*" -- "1 k" e
 		},
 		{
 			Question: model.Question{
+				OrderIndex: 5,
 				ProblemDescription: `
 鉄道会社は、それぞれ複数の車両と路線を持っています。路線は複数の駅で構成されています。
 鉄道会社が同じならば、駅は異なる路線で共有されることもあります。
@@ -343,6 +348,7 @@ e "0..1 Prev" -- "0..1 Next" e
 		},
 		{
 			Question: model.Question{
+				OrderIndex: 6,
 				ProblemDescription: `
 家庭教師の検索システムです。生徒は、システムに次のような家庭教師に対する希望（希望家庭教師像）を1〜3つまで入力します。
 希望に対応した、家庭教師の候補が表示されます。
@@ -405,6 +411,7 @@ c "1" o-- "i" e
 		},
 		{
 			Question: model.Question{
+				OrderIndex: 7,
 				ProblemDescription: `
 ある会社では、トレーニングを提供しています。コース開発者は、コースの企画、設計および教材の開発を行います。完成したコースは、日程を決めて受講者の募集をします。申込みが3人以上いれば実施されます。実施時は1人のメイン講師が行い、補助講師が1人付くことがあります。`,
 				Question:          "次のクラス図のa〜fに該当するものを選択し、モデルを完成させなさい。",
@@ -469,6 +476,7 @@ d "0..*" -- "0..1 補助" f
 		},
 		{
 			Question: model.Question{
+				OrderIndex: 8,
 				ProblemDescription: `
 小売店は、卸売業者からお酒を仕入れ、顧客に販売します。
 卸売業者は、メーカーからお酒を仕入れます。卸売業者と小売店は酒類販売業免許を持っている必要があります。卸売業者は酒類卸売業免許が、小売店は酒類小売業免許が必要になります。
@@ -542,6 +550,7 @@ g <|-- h
 		},
 		{
 			Question: model.Question{
+				OrderIndex: 9,
 				ProblemDescription: `
 感染症は、病原体が原因で発生します。病原体には、寄生虫、細菌、真菌、ウイルスがあります。
 感染経路には、飛沫感染、空気感染、接触感染、経口感染があります。
@@ -611,6 +620,7 @@ c <|-- e
 		},
 		{
 			Question: model.Question{
+				OrderIndex: 10,
 				ProblemDescription: `
 ある自転車店のパンク修理の費用を考えます。
 パンク修理の費用は工賃と部品代の合計になります。
@@ -702,6 +712,7 @@ g "0..1" o-- "1" i
 		},
 		{
 			Question: model.Question{
+				OrderIndex: 11,
 				ProblemDescription: `
 電子的に地図を参照することができます。
 GPSから現在の位置を取得し、地図上に表示することができます。
@@ -779,6 +790,7 @@ a "0..1" -- "0..1" g
 		},
 		{
 			Question: model.Question{
+				OrderIndex: 12,
 				ProblemDescription: `
 ある会社では、給与は社員のレベルによる基本給、手当て（役職手当、単身赴任手当て）、勤務票からの情報（残業時間や欠勤など）で計算されます。役職手当て、単身赴任手当てはそれぞれ同時に2つ以上つくことはありません。
 出社および退社の時間はタイムカードで管理されます。有給休暇取得や残業をするときは申請書が必要になります。`,
@@ -866,6 +878,7 @@ d <|-- j
 		},
 		{
 			Question: model.Question{
+				OrderIndex: 13,
 				ProblemDescription: `
 ある会社の、従業員の通勤経路およびその費用管理のシステムです。
 定期券がある場合は、6ヶ月の定期券代、定期券がない場合は片道運賃×往復×日数で計算します。

@@ -7,6 +7,7 @@ import (
 
 type Question struct {
 	ID                   int             `json:"id" gorm:"primaryKey"`
+	OrderIndex           int             `json:"order_index"`
 	ProblemDescription   string          `json:"problem_description"`
 	Question             string          `json:"question"`
 	AnswerProcess        string          `json:"answer_process"`
