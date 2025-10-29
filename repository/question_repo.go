@@ -46,7 +46,10 @@ func (r *questionRepository) GetQuestionByID(id int) (*model.Question, error) {
 
 func (r *questionRepository) GetAllQuestions() (*[]model.Question, error) {
 	var questions []model.Question
-	if err := r.db.Preload("Choices").Find(&questions).Error; err != nil {
+	if err := r.db.
+		Preload("Choices").
+		Order("id ASC").
+		Find(&questions).Error; err != nil {
 		return nil, fmt.Errorf("failed to get all questions: %w", err)
 	}
 	if len(questions) == 0 {

@@ -947,26 +947,22 @@ JR --|> d
 	return nil
 }
 
-// 共通処理
 func createQuestion(db *gorm.DB, seed QuestionSeed) error {
 	q := seed.Question
 	if err := db.Where("question = ?", q.ProblemDescription).FirstOrCreate(&q).Error; err != nil {
 		return err
 	}
 
-	// Choices
 	for _, c := range seed.Choices {
 		c.QuestionID = q.ID
 		db.Where("choice_code = ? AND question_id = ?", c.ChoiceCode, q.ID).FirstOrCreate(&c)
 	}
 
-	// Labels
 	for _, l := range seed.Labels {
 		l.QuestionID = q.ID
 		db.Where("label_code = ? AND question_id = ?", l.LabelCode, q.ID).FirstOrCreate(&l)
 	}
 
-	// Mappings
 	for _, m := range seed.Mappings {
 		var choice model.Choice
 		var label model.Label
