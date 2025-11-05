@@ -10,7 +10,7 @@ import (
 
 type IUserRepository interface {
 	FindBySub(ctx context.Context, sub string) (*model.User, error)
-	GetOrCreateBySub(ctx context.Context, sub string, studentNo *string) (*model.User, error)
+	GetOrCreateBySub(ctx context.Context, sub *string, studentNo *string) (*model.User, error)
 }
 
 type userRepository struct{ db *gorm.DB }
@@ -28,7 +28,7 @@ func (r *userRepository) FindBySub(ctx context.Context, sub string) (*model.User
 	return &u, nil
 }
 
-func (r *userRepository) GetOrCreateBySub(ctx context.Context, sub string, studentNo *string) (*model.User, error) {
+func (r *userRepository) GetOrCreateBySub(ctx context.Context, sub *string, studentNo *string) (*model.User, error) {
 	u := model.User{Sub: sub, StudentNo: studentNo}
 
 	// INSERT ... ON CONFLICT (sub) DO UPDATE SET student_no = EXCLUDED.student_no
@@ -54,5 +54,5 @@ func (r *userRepository) GetOrCreateBySub(ctx context.Context, sub string, stude
 		return nil, err
 	}
 
-	return r.FindBySub(ctx, sub)
+	return r.FindBySub(ctx, *sub)
 }

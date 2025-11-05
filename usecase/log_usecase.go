@@ -12,7 +12,7 @@ import (
 )
 
 type LogCommand struct {
-	Sub            string
+	Sub            *string
 	StudentNo6     *string
 	QuestionID     *int
 	EventName      string
@@ -41,8 +41,10 @@ func NewLogUsecase(lr repository.ILogRepository, ur repository.IUserRepository) 
 
 func (uc *logUsecase) SendLog(ctx context.Context, cmd LogCommand) (int, error) {
 
-	if _, err := uc.userRepo.GetOrCreateBySub(ctx, cmd.Sub, cmd.StudentNo6); err != nil {
-		return 0, err
+	if cmd.Sub != nil && cmd.StudentNo6 != nil {
+		if _, err := uc.userRepo.GetOrCreateBySub(ctx, cmd.Sub, cmd.StudentNo6); err != nil {
+			return 0, err
+		}
 	}
 
 	details := map[string]any{
@@ -52,11 +54,11 @@ func (uc *logUsecase) SendLog(ctx context.Context, cmd LogCommand) (int, error) 
 		"hintIndex":        cmd.HintIndex,
 		"useful":           cmd.Useful,
 		"comment":          cmd.Comment,
-		"anon_id":          cmd.AnonID,
 	}
 	raw, _ := json.Marshal(details)
 
 	log := model.OperationLog{
+		AnonID:          cmd.AnonID,
 		UserSub:         cmd.Sub,
 		QuestionId:      derefInt(cmd.QuestionID),
 		EventName:       cmd.EventName,

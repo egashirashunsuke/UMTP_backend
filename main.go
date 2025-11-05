@@ -58,7 +58,10 @@ func main() {
 	lUsecase := usecase.NewLogUsecase(lRepo, uRepo)
 	lCtl := controller.NewLogController(lUsecase)
 
-	jwtMW := echo.WrapMiddleware(emw.EnsureValidToken())
+	optMW, err := emw.OptionalAuth()
+	if err != nil {
+		e.Logger.Fatal(err)
+	}
 
 	//ルーティング
 	e.GET("/health", func(c echo.Context) error {
@@ -75,7 +78,7 @@ func main() {
 	e.GET("/question/:id/next", qCtrl.GetNextQuestion)
 	e.GET("/question/:id/prev", qCtrl.GetPrevQuestion)
 
-	e.POST("/api/log", lCtl.SendLog, jwtMW)
+	e.POST("/api/log", lCtl.SendLog, optMW)
 
 	// PORT環境変数を取得し、なければ10000を使う
 	port := os.Getenv("PORT")
