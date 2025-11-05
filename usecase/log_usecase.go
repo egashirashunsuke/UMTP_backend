@@ -1,73 +1,76 @@
+// usecase/log_usecase.go
 package usecase
 
 import (
+	"context"
 	"encoding/json"
 	"time"
 
 	"github.com/egashirashunsuke/UMTP_backend/model"
 	"github.com/egashirashunsuke/UMTP_backend/repository"
-	"github.com/google/uuid"
 	"gorm.io/datatypes"
 )
 
-type LogData struct {
-	DeviceId       string             `json:"device_id"`
-	QuestionId     int                `json:"question_id"`
-	EventName      string             `json:"event_name"`
-	Answers        map[string]*string `json:"answers"`
-	HintOpenStatus map[string]bool    `json:"hint_open_status"`
-	Hints          map[string]*string `json:"hints"`
-	Timestamp      string             `json:"timestamp"`
-	HintIndex      *int               `json:"hintIndex"`
-	Useful         *int               `json:"useful"`
-	Comment        *string            `json:"comment"`
+type LogCommand struct {
+	Sub            *string
+	StudentNo6     *string
+	QuestionID     *int
+	EventName      string
+	Answers        map[string]*string
+	HintOpenStatus map[string]bool
+	Hints          map[string]*string
+	HintIndex      *int
+	Useful         *int
+	Comment        *string
+	AnonID         *string
+	ClientAt       *time.Time
 }
 
 type ILogUsecase interface {
-	SendLog(logdata *LogData) error
+	SendLog(ctx context.Context, in LogCommand) (int, error)
 }
 
-type LogUsecase struct {
-	lr repository.ILogRepository
+type logUsecase struct {
+	logRepo  repository.ILogRepository
+	userRepo repository.IUserRepository
 }
 
-func NewLogUsecase(lr repository.ILogRepository) ILogUsecase {
-	return &LogUsecase{lr: lr}
+func NewLogUsecase(lr repository.ILogRepository, ur repository.IUserRepository) ILogUsecase {
+	return &logUsecase{logRepo: lr, userRepo: ur}
 }
 
-func (lu *LogUsecase) SendLog(logdata *LogData) error {
-	devUUID, err := uuid.Parse(logdata.DeviceId)
-	if err != nil {
-		return err
-	}
-	detailsMap := map[string]interface{}{
-		"answers":          logdata.Answers,
-		"hint_open_status": logdata.HintOpenStatus,
-		"hints":            logdata.Hints,
-	}
-	if logdata.HintIndex != nil {
-		detailsMap["hintIndex"] = *logdata.HintIndex
-	}
-	if logdata.Useful != nil {
-		detailsMap["useful"] = *logdata.Useful
-	}
-	if logdata.Comment != nil {
-		detailsMap["comment"] = *logdata.Comment
+func (uc *logUsecase) SendLog(ctx context.Context, cmd LogCommand) (int, error) {
+
+	if cmd.Sub != nil && cmd.StudentNo6 != nil {
+		if _, err := uc.userRepo.GetOrCreateBySub(ctx, cmd.Sub, cmd.StudentNo6); err != nil {
+			return 0, err
+		}
 	}
 
-	detailsJSON, err := json.Marshal(detailsMap)
-	if err != nil {
-		return err
+	details := map[string]any{
+		"answers":          cmd.Answers,
+		"hint_open_status": cmd.HintOpenStatus,
+		"hints":            cmd.Hints,
+		"hintIndex":        cmd.HintIndex,
+		"useful":           cmd.Useful,
+		"comment":          cmd.Comment,
 	}
+	raw, _ := json.Marshal(details)
 
-	op := &model.OperationLog{
-		DeviceId:        devUUID,
-		QuestionId:      logdata.QuestionId,
-		EventName:       logdata.EventName,
-		Timestamp:       logdata.Timestamp,
-		Details:         datatypes.JSON(detailsJSON),
-		ServerTimestamp: time.Now(),
+	log := model.OperationLog{
+		AnonID:          cmd.AnonID,
+		UserSub:         cmd.Sub,
+		QuestionId:      derefInt(cmd.QuestionID),
+		EventName:       cmd.EventName,
+		Details:         datatypes.JSON(raw),
+		ClientTimestamp: cmd.ClientAt,
 	}
+	return uc.logRepo.SaveLog(ctx, &log)
+}
 
-	return lu.lr.SaveLog(op)
+func derefInt(p *int) int {
+	if p == nil {
+		return 0
+	}
+	return *p
 }
