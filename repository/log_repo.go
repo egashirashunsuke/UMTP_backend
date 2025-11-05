@@ -1,24 +1,25 @@
 package repository
 
 import (
+	"context"
+
 	"github.com/egashirashunsuke/UMTP_backend/model"
 	"gorm.io/gorm"
 )
 
 type ILogRepository interface {
-	SaveLog(log *model.OperationLog) error
+	SaveLog(ctx context.Context, log *model.OperationLog) (int, error)
 }
 
-type logRepository struct {
-	db *gorm.DB
-}
+type logRepository struct{ db *gorm.DB }
 
 func NewLogRepository(db *gorm.DB) ILogRepository {
 	return &logRepository{db: db}
 }
-func (r *logRepository) SaveLog(log *model.OperationLog) error {
-	if err := r.db.Create(log).Error; err != nil {
-		return err
+
+func (r *logRepository) SaveLog(ctx context.Context, log *model.OperationLog) (int, error) {
+	if err := r.db.WithContext(ctx).Create(log).Error; err != nil {
+		return 0, err
 	}
-	return nil
+	return log.ID, nil
 }

@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"os"
 
+	emw "github.com/egashirashunsuke/UMTP_backend/middleware"
+
 	"github.com/egashirashunsuke/UMTP_backend/controller"
 	"github.com/egashirashunsuke/UMTP_backend/model"
 	"github.com/egashirashunsuke/UMTP_backend/repository"
@@ -30,10 +32,15 @@ func main() {
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{
 			"https://localhost:5173",
+			"http://localhost:5173",
 			"https://umtp-shunsuke-egashiras-projects.vercel.app",
 		},
-		AllowMethods: []string{http.MethodGet, http.MethodPost},
-		// 必要に応じて PUT, DELETE, OPTIONS なども追加
+		AllowMethods: []string{
+			http.MethodGet, http.MethodPost, http.MethodOptions,
+		},
+		AllowHeaders: []string{
+			"Content-Type", "Authorization", "Idempotency-Key",
+		},
 	}))
 
 	qRepo := repository.NewQuestionRepository(db)
@@ -47,8 +54,11 @@ func main() {
 	hCtl := controller.NewHintsController(hUC)
 
 	lRepo := repository.NewLogRepository(db)
-	lUsecase := usecase.NewLogUsecase(lRepo)
+	uRepo := repository.NewUserRepository(db)
+	lUsecase := usecase.NewLogUsecase(lRepo, uRepo)
 	lCtl := controller.NewLogController(lUsecase)
+
+	jwtMW := echo.WrapMiddleware(emw.EnsureValidToken())
 
 	//ルーティング
 	e.GET("/health", func(c echo.Context) error {
@@ -65,7 +75,7 @@ func main() {
 	e.GET("/question/:id/next", qCtrl.GetNextQuestion)
 	e.GET("/question/:id/prev", qCtrl.GetPrevQuestion)
 
-	e.POST("/api/log", lCtl.SendLog)
+	e.POST("/api/log", lCtl.SendLog, jwtMW)
 
 	// PORT環境変数を取得し、なければ10000を使う
 	port := os.Getenv("PORT")
