@@ -60,29 +60,8 @@ func NewHintsService() usecase.HintGenerator {
 // GetHints は OpenAI の ChatCompletion を呼び出し、返ってきたテキストを返す
 func (s *hintsServiceImpl) Generate(ctx context.Context, question *model.Question, answers map[string]*string) ([]string, error) {
 
-	var keys []string
-	for k := range answers {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-	var sb strings.Builder
-	for _, k := range keys {
-		val := ""
-		if answers[k] != nil {
-			val = *answers[k]
-		}
-		sb.WriteString(fmt.Sprintf("%s: %s\n", k, val))
-	}
-	answersStr := sb.String()
+	prompt, err := BuildPromptForQuestion(question, answers)
 
-	prompt, err := BuildPrompt(PromptData{
-		ProblemDescription:   question.ProblemDescription,
-		Question:             question.Question,
-		ClassDiagramPlantUML: question.ClassDiagramPlantUML,
-		Choices:              FormatChoices(question.Choices),
-		StudentAnswers:       answersStr,
-		Steps:                question.AnswerProcess,
-	})
 	if err != nil {
 		return nil, err
 	}
@@ -141,4 +120,31 @@ func FormatChoices(choices []model.Choice) string {
 		sb.WriteString(fmt.Sprintf("%s. %s\n", c.ChoiceCode, c.ChoiceText))
 	}
 	return sb.String()
+}
+
+func BuildPromptForQuestion(question *model.Question, answers map[string]*string) (string, error) {
+	var keys []string
+	for k := range answers {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	var sb strings.Builder
+	for _, k := range keys {
+		val := ""
+		if answers[k] != nil {
+			val = *answers[k]
+		}
+		sb.WriteString(fmt.Sprintf("%s: %s\n", k, val))
+	}
+	answersStr := sb.String()
+
+	return BuildPrompt(PromptData{
+		ProblemDescription:   question.ProblemDescription,
+		Question:             question.Question,
+		ClassDiagramPlantUML: question.ClassDiagramPlantUML,
+		Choices:              FormatChoices(question.Choices),
+		StudentAnswers:       answersStr,
+		Steps:                question.AnswerProcess,
+	})
 }

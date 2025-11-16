@@ -1,9 +1,10 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
+	"fmt"
 	"log"
+	"os"
 	"sort"
 	"strings"
 
@@ -12,12 +13,18 @@ import (
 	"github.com/egashirashunsuke/UMTP_backend/service"
 )
 
+type BatchLine struct {
+	CustomID string                 `json:"custom_id"`
+	Method   string                 `json:"method"`
+	URL      string                 `json:"url"`
+	Body     map[string]interface{} `json:"body"`
+}
+
 func main() {
 	db := model.DBConnection()
 	sqlDB, _ := db.DB()
 	defer sqlDB.Close()
 
-	// すべての問題を取得
 	qRepo := repository.NewQuestionRepository(db)
 	questions, err := qRepo.GetAllQuestions()
 	if err != nil {
@@ -25,9 +32,17 @@ func main() {
 	}
 	log.Printf("問題数: %d", len(*questions))
 
-	hintGen := service.NewHintsService()
+	f, err := os.Create("batch-input.jsonl")
+	if err != nil {
+		log.Fatalf("batch-input.jsonl 作成失敗: %v", err)
+	}
+	defer f.Close()
+	enc := json.NewEncoder(f)
 
-	ctx := context.Background()
+	modelName := os.Getenv("OPENAI_MODEL")
+	if modelName == "" {
+		modelName = "gpt-5"
+	}
 
 	for _, q := range *questions {
 		if q.ID != 4 {
@@ -55,36 +70,39 @@ func main() {
 			}
 
 			// ヒントを生成
-			hints, err := hintGen.Generate(ctx, &q, combo)
+			prompt, err := service.BuildPromptForQuestion(&q, combo)
 			if err != nil {
-				log.Printf("  エラー: %v", err)
+				log.Printf("  プロンプト生成エラー: %v", err)
 				continue
 			}
-
-			hintsJSON, err := json.Marshal(hints)
-			if err != nil {
-				log.Printf("  JSON変換エラー: %v", err)
-				continue
-			}
-
 			stateKey := generateStateKey(combo)
+			customID := fmt.Sprintf("q%d_%s", q.ID, stateKey)
 
-			hint := model.Hint{
-				QuestionID:   q.ID,
-				AnswersState: stateKey,
-				Hints:        string(hintsJSON),
+			line := BatchLine{
+				CustomID: customID,
+				Method:   "POST",
+				URL:      "/v1/chat/completions",
+				Body: map[string]interface{}{
+					"model": modelName,
+					"messages": []map[string]string{
+						{
+							"role":    "user",
+							"content": prompt,
+						},
+					},
+				},
 			}
 
-			if err := db.Where("question_id = ? AND answers_state = ?", q.ID, stateKey).
-				FirstOrCreate(&hint).Error; err != nil {
-				log.Printf("  保存エラー: %v", err)
+			if err := enc.Encode(&line); err != nil {
+				log.Printf("  JSONL書き込みエラー: %v", err)
+				continue
 			}
 		}
 
 		log.Printf("問題 ID=%d のヒント生成完了", q.ID)
 	}
 
-	log.Println("✅ すべてのヒント生成完了")
+	log.Println("✅ すべてのbatch生成完了")
 }
 
 // 各ラベルについて「埋まっている」「埋まっていない」の2通り
