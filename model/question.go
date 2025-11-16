@@ -20,14 +20,14 @@ type Question struct {
 }
 
 func (q *Question) Check(ans map[string]*string) (bool, string) {
-	correct := make(map[string]string)
+	correctAnswers := make(map[string]string)
 	for _, am := range q.AnswerMappings {
-		correct[am.Label.LabelCode] = am.Choice.ChoiceCode
+		correctAnswers[am.Label.LabelCode] = am.Choice.ChoiceCode
 	}
 
 	var errs []string
 
-	for label, want := range correct {
+	for label, want := range correctAnswers {
 		got := ""
 		if v, ok := ans[label]; ok && v != nil {
 			got = strings.TrimSpace(*v)
@@ -36,12 +36,11 @@ func (q *Question) Check(ans map[string]*string) (bool, string) {
 				errs = append(errs, fmt.Sprintf("%s の正解は %s（あなた: %s）", label, want, got))
 			}
 		}
-		// 未回答は無視（エラーにしない）
 	}
 
 	// 不要なラベルはエラーにする
 	for label := range ans {
-		if _, ok := correct[label]; !ok {
+		if _, ok := correctAnswers[label]; !ok {
 			errs = append(errs, fmt.Sprintf("不要なラベル %s が含まれています", label))
 		}
 	}
