@@ -2,7 +2,10 @@ package usecase
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"sort"
+	"strings"
 
 	"github.com/egashirashunsuke/UMTP_backend/model"
 	"github.com/egashirashunsuke/UMTP_backend/repository"
@@ -27,12 +30,17 @@ type HintGenerator interface {
 }
 
 type hintsUsecase struct {
-	repo repository.IQuestionRepository
-	hg   HintGenerator
+	repo     repository.IQuestionRepository
+	hintRepo repository.IHintRepository
+	hg       HintGenerator
 }
 
-func NewHintsUsecase(repo repository.IQuestionRepository, hg HintGenerator) IHintsUsecase {
-	return &hintsUsecase{repo: repo, hg: hg}
+func NewHintsUsecase(repo repository.IQuestionRepository, hintRepo repository.IHintRepository, hg HintGenerator) IHintsUsecase {
+	return &hintsUsecase{
+		repo:     repo,
+		hintRepo: hintRepo,
+		hg:       hg,
+	}
 }
 
 func (u *hintsUsecase) GetHints(ctx context.Context, in GenerateHintInput) (*GenerateHintOutput, error) {
@@ -42,14 +50,41 @@ func (u *hintsUsecase) GetHints(ctx context.Context, in GenerateHintInput) (*Gen
 		return nil, fmt.Errorf("問題取得失敗: %w", err)
 	}
 
-	// 3) 不正解ならヒント生成（AI など）
-	hint, err := u.hg.Generate(ctx, q, in.Answers)
+	// 事前生成されたヒントを検索
+	stateKey := generateStateKey(in.Answers)
+	hint, err := u.hintRepo.GetHintByQuestionIDAndState(in.QuestionID, stateKey)
+	if err == nil {
+		// 事前生成されたヒントが見つかった
+		var hints []string
+		if err := json.Unmarshal([]byte(hint.Hints), &hints); err != nil {
+			return nil, fmt.Errorf("ヒントのパース失敗: %w", err)
+		}
+		return &GenerateHintOutput{
+			Correct: false,
+			Hints:   hints,
+		}, nil
+	}
+
+	// 事前生成されたヒントがない場合はリアルタイム生成
+	hintList, err := u.hg.Generate(ctx, q, in.Answers)
 	if err != nil {
 		return nil, fmt.Errorf("ヒント生成失敗: %w", err)
 	}
 
 	return &GenerateHintOutput{
 		Correct: false,
-		Hints:   hint,
+		Hints:   hintList,
 	}, nil
+}
+
+func generateStateKey(answers map[string]*string) string {
+	var keys []string
+	for k, v := range answers {
+		// nil でない、かつ空文字列でないキーのみを含める
+		if v != nil && *v != "" {
+			keys = append(keys, k)
+		}
+	}
+	sort.Strings(keys)
+	return strings.Join(keys, ",")
 }

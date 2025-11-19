@@ -44,11 +44,12 @@ func main() {
 	}))
 
 	qRepo := repository.NewQuestionRepository(db)
+	hintRepo := repository.NewHintRepository(db)
 
 	hintGen := service.NewHintsService()
 
 	qUsecase := usecase.NewQuestionUsecase(qRepo)
-	hUC := usecase.NewHintsUsecase(qRepo, hintGen)
+	hUC := usecase.NewHintsUsecase(qRepo, hintRepo, hintGen)
 
 	qCtrl := controller.NewQuestionController(qUsecase)
 	hCtl := controller.NewHintsController(hUC)
