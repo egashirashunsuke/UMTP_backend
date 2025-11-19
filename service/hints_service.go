@@ -13,8 +13,8 @@ import (
 
 	"github.com/egashirashunsuke/UMTP_backend/model"
 	"github.com/egashirashunsuke/UMTP_backend/usecase"
-	"github.com/openai/openai-go"
-	"github.com/openai/openai-go/option"
+	"github.com/openai/openai-go/v3"
+	"github.com/openai/openai-go/v3/option"
 )
 
 type PromptData struct {
