@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -21,6 +22,9 @@ type BatchLine struct {
 }
 
 func main() {
+	targetQuestionID := flag.Uint("question-id", 0, "バッチ生成対象の問題ID (0なら全問題)")
+	flag.Parse()
+
 	db := model.DBConnection()
 	sqlDB, _ := db.DB()
 	defer sqlDB.Close()
@@ -45,7 +49,7 @@ func main() {
 	}
 
 	for _, q := range *questions {
-		if q.ID != 4 {
+		if *targetQuestionID != 0 && q.ID != int(*targetQuestionID) {
 			continue
 		}
 
