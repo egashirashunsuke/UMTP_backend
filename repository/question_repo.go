@@ -48,6 +48,9 @@ func (r *questionRepository) GetAllQuestions() (*[]model.Question, error) {
 	var questions []model.Question
 	if err := r.db.
 		Preload("Choices").
+		Preload("Labels").
+		Preload("AnswerMappings.Choice").
+		Preload("AnswerMappings.Label").
 		Order("id ASC").
 		Find(&questions).Error; err != nil {
 		return nil, fmt.Errorf("failed to get all questions: %w", err)
