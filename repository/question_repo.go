@@ -30,7 +30,9 @@ func (r *questionRepository) GetQuestionByID(id int) (*model.Question, error) {
 	if err := r.db.Preload("Choices").Preload("AnswerMappings.Choice").
 		Preload("AnswerMappings.Label").
 		Preload("Choices").
-		Preload("Labels").First(&question, id).Error; err != nil {
+		Preload("Labels", func(db *gorm.DB) *gorm.DB {
+			return db.Order("order_id ASC")
+		}).First(&question, id).Error; err != nil {
 		return nil, err
 	}
 	log.Printf("[repo] loaded: choices=%d labels=%d am=%d",

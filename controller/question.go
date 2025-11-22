@@ -17,6 +17,7 @@ type IQuestionController interface {
 	GetNextQuestion(c echo.Context) error
 	GetPrevQuestion(c echo.Context) error
 	CheckAnswer(c echo.Context) error
+	GetAnswer(c echo.Context) error
 }
 
 type questionController struct {
@@ -124,8 +125,27 @@ func (h *questionController) CheckAnswer(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
-	// 3) 結果返却
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"correct": out,
+	})
+}
+
+func (h *questionController) GetAnswer(c echo.Context) error {
+	idStr := c.Param("questionID")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid questionID"})
+	}
+
+	answer, err := h.uu.GetAnswer(id)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return c.JSON(http.StatusNotFound, map[string]string{"error": "not found"})
+		}
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"answers": answer,
 	})
 }

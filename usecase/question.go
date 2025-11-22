@@ -15,6 +15,7 @@ type IQuestionUsecase interface {
 	GetNextQuestion(currentID int) (model.Question, error)
 	GetPrevQuestion(currentID int) (model.Question, error)
 	CheckAnswer(questionID int, answers map[string]*string) (bool, error)
+	GetAnswer(questionID int) (map[string]string, error)
 }
 
 type questionUsecase struct {
@@ -75,4 +76,18 @@ func (uc *questionUsecase) CheckAnswer(questionID int, answers map[string]*strin
 	ok, msg := q.Check(answers)
 	fmt.Println(msg)
 	return ok, nil
+}
+
+func (u *questionUsecase) GetAnswer(questionID int) (map[string]string, error) {
+	q, err := u.qr.GetQuestionByID(questionID)
+	if err != nil {
+		return nil, err
+	}
+
+	answer := make(map[string]string)
+	for _, am := range q.AnswerMappings {
+		answer[am.Label.LabelCode] = am.Choice.ChoiceCode
+	}
+
+	return answer, nil
 }
