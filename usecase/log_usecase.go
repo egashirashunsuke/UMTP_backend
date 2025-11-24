@@ -20,6 +20,7 @@ type LogCommand struct {
 	HintOpenStatus map[string]bool
 	Hints          map[string]*string
 	AnonID         *string
+	ClientOrigin   *string
 	ClientAt       *time.Time
 }
 
@@ -57,6 +58,7 @@ func (uc *logUsecase) SendLog(ctx context.Context, cmd LogCommand) (int, error) 
 		QuestionId:      derefInt(cmd.QuestionID),
 		EventName:       cmd.EventName,
 		Details:         datatypes.JSON(raw),
+		ClientOrigin:    cmd.ClientOrigin,
 		ClientTimestamp: cmd.ClientAt,
 	}
 	return uc.logRepo.SaveLog(ctx, &log)
