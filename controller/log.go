@@ -29,6 +29,11 @@ func (lc *LogController) SendLog(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid json"})
 	}
 
+	origin := c.Request().Header.Get("Origin")
+	if origin == "" {
+		origin = c.Request().Header.Get("Referer")
+	}
+
 	var subPtr *string
 	if v := c.Get("sub"); v != nil {
 		if sub, ok := v.(string); ok && sub != "" {
@@ -43,19 +48,15 @@ func (lc *LogController) SendLog(c echo.Context) error {
 		}
 	}
 
-	// Usecase入力DTOへ詰め替え（アプリ内DTO）
 	uin := usecase.LogCommand{
 		Sub:            subPtr,
-		StudentNo6:     in.StudentID,
 		QuestionID:     in.QuestionID,
 		EventName:      in.EventName,
 		Answers:        in.Answers,
 		HintOpenStatus: in.HintOpenStatus,
 		Hints:          in.Hints,
-		HintIndex:      in.HintIndex,
-		Useful:         in.Useful,
-		Comment:        in.Comment,
 		AnonID:         in.AnonID,
+		ClientOrigin:   &origin,
 		ClientAt:       clientAt,
 	}
 

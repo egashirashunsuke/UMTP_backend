@@ -14,6 +14,7 @@ type OperationLog struct {
 	QuestionId      int            `json:"question_id"`
 	EventName       string         `json:"event_name"`
 	Details         datatypes.JSON `json:"details"`
+	ClientOrigin    *string        `json:"client_origin"`
 	ClientTimestamp *time.Time     `json:"timestamp"`
 	ServerTimestamp time.Time      `json:"server_timestamp" gorm:"autoCreateTime"`
 }

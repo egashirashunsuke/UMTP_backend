@@ -19,10 +19,8 @@ type LogCommand struct {
 	Answers        map[string]*string
 	HintOpenStatus map[string]bool
 	Hints          map[string]*string
-	HintIndex      *int
-	Useful         *int
-	Comment        *string
 	AnonID         *string
+	ClientOrigin   *string
 	ClientAt       *time.Time
 }
 
@@ -51,9 +49,6 @@ func (uc *logUsecase) SendLog(ctx context.Context, cmd LogCommand) (int, error) 
 		"answers":          cmd.Answers,
 		"hint_open_status": cmd.HintOpenStatus,
 		"hints":            cmd.Hints,
-		"hintIndex":        cmd.HintIndex,
-		"useful":           cmd.Useful,
-		"comment":          cmd.Comment,
 	}
 	raw, _ := json.Marshal(details)
 
@@ -63,6 +58,7 @@ func (uc *logUsecase) SendLog(ctx context.Context, cmd LogCommand) (int, error) 
 		QuestionId:      derefInt(cmd.QuestionID),
 		EventName:       cmd.EventName,
 		Details:         datatypes.JSON(raw),
+		ClientOrigin:    cmd.ClientOrigin,
 		ClientTimestamp: cmd.ClientAt,
 	}
 	return uc.logRepo.SaveLog(ctx, &log)
