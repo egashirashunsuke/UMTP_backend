@@ -34,7 +34,8 @@ func main() {
 			"https://localhost:5173",
 			"http://localhost:5173",
 			"https://umtp.vercel.app",
-			"https://umtp-p7ilvc9eg-shunsuke-egashiras-projects.vercel.app"},
+			"https://umtp-p7ilvc9eg-shunsuke-egashiras-projects.vercel.app",
+			"https://umtp-control.vercel.app"},
 		AllowMethods: []string{
 			http.MethodGet, http.MethodPost, http.MethodOptions,
 		},
