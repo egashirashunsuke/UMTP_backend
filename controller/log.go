@@ -50,6 +50,7 @@ func (lc *LogController) SendLog(c echo.Context) error {
 
 	uin := usecase.LogCommand{
 		Sub:            subPtr,
+		StudentNo6:     in.StudentID,
 		QuestionID:     in.QuestionID,
 		EventName:      in.EventName,
 		Answers:        in.Answers,
