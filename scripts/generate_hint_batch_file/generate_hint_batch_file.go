@@ -110,7 +110,7 @@ func main() {
 }
 
 // 各ラベルについて「埋まっている」「埋まっていない」の2通り
-// ただし、全て埋まっている状態と、最後の一つだけ埋まっていない状態は除外
+// ただし、全て埋まっている状態は除外
 func generateAllCombinations(labels []model.Label, correctAnswers map[string]string) []map[string]*string {
 	n := len(labels)
 	total := 1 << n
@@ -134,7 +134,7 @@ func generateAllCombinations(labels []model.Label, correctAnswers map[string]str
 			}
 		}
 
-		if filledCount == n || filledCount == n-1 {
+		if filledCount == n {
 			continue
 		}
 
